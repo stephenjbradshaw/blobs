@@ -38,7 +38,11 @@ const Canvas = ({...rest}) => {
     };
   }, [draw]);
 
-  return <canvas ref={canvasRef} {...rest} />;
+  return (
+    <canvas ref={canvasRef} {...rest} style={{border: "1px solid black"}}>
+      <p>Alt text here</p>
+    </canvas>
+  );
 };
 
 export default Canvas;
