@@ -10,21 +10,35 @@ const Canvas = ({...rest}) => {
     let initialTimestamp, elapsedTime;
     let animationFrameId;
 
-    const ball = {
-      x: 100,
-      y: 100,
-      vx: 3,
-      vy: 2,
-      radius: 15,
-      color: "blue",
-      draw: function () {
+    class Ball {
+      constructor(x, y, vx, vy, radius, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.radius = radius;
+        this.color = color;
+      }
+      draw(canvas, ctx) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.fillStyle = this.color;
         ctx.fill();
-      },
-    };
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.y + this.vy > canvas.height || this.y + this.vy < 0) {
+          this.vy = -this.vy;
+        }
+        if (this.x + this.vx > canvas.width || this.x + this.vx < 0) {
+          this.vx = -this.vx;
+        }
+      }
+    }
+
+    const ball1 = new Ball(100, 100, 3, 2, 15, "blue");
+    const ball2 = new Ball(100, 100, 5, 3, 15, "red");
 
     const renderFrame = (currentTimestamp) => {
       // If this is the first frame, store the initial timestamp
@@ -36,16 +50,8 @@ const Canvas = ({...rest}) => {
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ball.draw();
-      ball.x += ball.vx;
-      ball.y += ball.vy;
-
-      if (ball.y + ball.vy > canvas.height || ball.y + ball.vy < 0) {
-        ball.vy = -ball.vy;
-      }
-      if (ball.x + ball.vx > canvas.width || ball.x + ball.vx < 0) {
-        ball.vx = -ball.vx;
-      }
+      ball1.draw(canvas, ctx);
+      ball2.draw(canvas, ctx);
 
       // Step to next frame with recursive call
       animationFrameId = window.requestAnimationFrame(renderFrame);
