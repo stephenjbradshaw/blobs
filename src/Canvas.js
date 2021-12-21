@@ -10,6 +10,22 @@ const Canvas = ({...rest}) => {
     let initialTimestamp, elapsedTime;
     let animationFrameId;
 
+    const ball = {
+      x: 100,
+      y: 100,
+      vx: 3,
+      vy: 2,
+      radius: 15,
+      color: "blue",
+      draw: function () {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      },
+    };
+
     const renderFrame = (currentTimestamp) => {
       // If this is the first frame, store the initial timestamp
       if (initialTimestamp === undefined) {
@@ -19,19 +35,17 @@ const Canvas = ({...rest}) => {
         elapsedTime = currentTimestamp - initialTimestamp;
       }
 
-      // Circle params
-      const x = 50;
-      const y = 100;
-      const radius = 20 * Math.sin(elapsedTime * 0.001) ** 2;
-      const startAngle = 0;
-      const endAngle = 2 * Math.PI;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ball.draw();
+      ball.x += ball.vx;
+      ball.y += ball.vy;
 
-      // Draw
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = "#000000";
-      ctx.beginPath();
-      ctx.arc(x, y, radius, startAngle, endAngle);
-      ctx.fill();
+      if (ball.y + ball.vy > canvas.height || ball.y + ball.vy < 0) {
+        ball.vy = -ball.vy;
+      }
+      if (ball.x + ball.vx > canvas.width || ball.x + ball.vx < 0) {
+        ball.vx = -ball.vx;
+      }
 
       // Step to next frame with recursive call
       animationFrameId = window.requestAnimationFrame(renderFrame);
