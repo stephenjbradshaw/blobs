@@ -9,7 +9,7 @@ export class Ball {
     this.previousElapsedTime = 0;
     this.isFirstDraw = true;
   }
-  draw(canvas, ctx, elapsedTime, velocity) {
+  draw(canvas, ctx, elapsedTime, velocity, synth, controls) {
     // Do nothing on first frame, because we need two frames to work out time since last draw
     if (elapsedTime === 0) return;
 
@@ -40,9 +40,11 @@ export class Ball {
     // On collision with edges, flip delta values for the next draw
     if (this.y + this.dy > canvas.height || this.y + this.dy < 0) {
       this.dy = -this.dy;
+      controls.isAudioReady && synth.triggerAttackRelease("C4", "8n");
     }
     if (this.x + this.dx > canvas.width || this.x + this.dx < 0) {
       this.dx = -this.dx;
+      controls.isAudioReady && synth.triggerAttackRelease("D4", "8n");
     }
 
     this.previousElapsedTime = elapsedTime;

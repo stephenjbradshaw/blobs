@@ -1,13 +1,18 @@
 import {useRef, useEffect} from "react";
-import { Ball } from "./Ball";
+import {Ball} from "./Ball";
+import * as Tone from "tone";
 
 const Canvas = ({...rest}) => {
   const canvasRef = useRef(null);
+  // Store control states in ref, as we don't want changes to cause rerender
+  const controlsRef = useRef({isAudioReady: false});
+  const controls = controlsRef.current;
 
   useEffect(() => {
-
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
+
+    const synth = new Tone.PolySynth().toDestination();
 
     const ball1 = new Ball(canvas, 12, "blue");
     const ball2 = new Ball(canvas, 12, "red");
@@ -24,8 +29,8 @@ const Canvas = ({...rest}) => {
 
       if (previousTimestamp !== currentTimestamp) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ball1.draw(canvas, ctx, elapsedTime, 200);
-        ball2.draw(canvas, ctx, elapsedTime, 100);
+        ball1.draw(canvas, ctx, elapsedTime, 200, synth, controls);
+        ball2.draw(canvas, ctx, elapsedTime, 100, synth, controls);
       }
 
       previousTimestamp = currentTimestamp;
@@ -38,12 +43,22 @@ const Canvas = ({...rest}) => {
     return () => {
       window.cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [controls]);
 
   return (
-    <canvas ref={canvasRef} {...rest} style={{border: "1px solid black"}}>
-      <p>Alt text here</p>
-    </canvas>
+    <>
+      <canvas ref={canvasRef} {...rest} style={{border: "1px solid black"}}>
+        <p>Alt text here</p>
+      </canvas>
+      <button
+        onClick={async () => {
+          await Tone.start();
+          controls.isAudioReady = true;
+        }}
+      >
+        Start audio
+      </button>
+    </>
   );
 };
 
