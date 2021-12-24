@@ -1,39 +1,47 @@
-import {useRef, useEffect} from "react";
-import {Ball} from "./Ball";
+import {useRef, useEffect, useState} from "react";
 import * as Tone from "tone";
+import useBall from "./useBall";
 
 const Canvas = ({...rest}) => {
   const canvasRef = useRef(null);
-  // Store control states in ref, as we don't want changes to cause rerender
-  const controlsRef = useRef({isAudioReady: false});
-  const controls = controlsRef.current;
+  // Ref used so that these values persist across re-renders
+  const timersRef = useRef({
+    initialTimestamp: undefined,
+    previousTimestamp: undefined,
+    elapsedTime: undefined,
+  });
+
+  const timers = timersRef.current;
+
+  const [isAudioReady, setIsAudioReady] = useState(false);
+
+  const {draw} = useBall({radius: 12, color: "blue"});
+
+  const synth = new Tone.PolySynth().toDestination();
 
   useEffect(() => {
+    let animationFrameId;
+
+    // Velocity is in pixels / second
+    let velocity = 200;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    const synth = new Tone.PolySynth().toDestination();
-
-    const ball1 = new Ball(canvas, 12, "blue");
-    const ball2 = new Ball(canvas, 12, "red");
-
-    let initialTimestamp, previousTimestamp, elapsedTime, animationFrameId;
-
     const renderFrame = (currentTimestamp) => {
       // If this is the first frame, store the initial timestamp
-      if (initialTimestamp === undefined) {
-        initialTimestamp = currentTimestamp;
+      if (timers.initialTimestamp === undefined) {
+        timers.initialTimestamp = currentTimestamp;
       }
       // Calculate time since animation started – animation progress will be based on this
-      elapsedTime = currentTimestamp - initialTimestamp;
+      timers.elapsedTime = currentTimestamp - timers.initialTimestamp;
 
-      if (previousTimestamp !== currentTimestamp) {
+      if (timers.previousTimestamp !== currentTimestamp) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ball1.draw(canvas, ctx, elapsedTime, 200, synth, controls);
-        ball2.draw(canvas, ctx, elapsedTime, 100, synth, controls);
+        draw(canvas, ctx, timers.elapsedTime, velocity, synth, isAudioReady);
       }
 
-      previousTimestamp = currentTimestamp;
+      timers.previousTimestamp = currentTimestamp;
       // Step to next frame with recursive call
       animationFrameId = window.requestAnimationFrame(renderFrame);
     };
@@ -43,7 +51,7 @@ const Canvas = ({...rest}) => {
     return () => {
       window.cancelAnimationFrame(animationFrameId);
     };
-  }, [controls]);
+  }, [draw, isAudioReady, synth, timers]);
 
   return (
     <>
@@ -53,7 +61,7 @@ const Canvas = ({...rest}) => {
       <button
         onClick={async () => {
           await Tone.start();
-          controls.isAudioReady = true;
+          setIsAudioReady(true);
         }}
       >
         Start audio
