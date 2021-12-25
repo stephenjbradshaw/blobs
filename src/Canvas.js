@@ -1,8 +1,7 @@
-import {useRef, useEffect, useState} from "react";
-import * as Tone from "tone";
+import {useRef, useEffect} from "react";
 import useBall from "./useBall";
 
-const Canvas = ({...rest}) => {
+const Canvas = ({synth, isAudioReady, ...rest}) => {
   const canvasRef = useRef(null);
   // Ref used so that these values persist across re-renders
   const timersRef = useRef({
@@ -13,11 +12,7 @@ const Canvas = ({...rest}) => {
 
   const timers = timersRef.current;
 
-  const [isAudioReady, setIsAudioReady] = useState(false);
-
   const {draw} = useBall({radius: 12, color: "blue"});
-
-  const synth = new Tone.PolySynth().toDestination();
 
   useEffect(() => {
     let animationFrameId;
@@ -54,19 +49,9 @@ const Canvas = ({...rest}) => {
   }, [draw, isAudioReady, synth, timers]);
 
   return (
-    <>
-      <canvas ref={canvasRef} {...rest} style={{border: "1px solid black"}}>
-        <p>Alt text here</p>
-      </canvas>
-      <button
-        onClick={async () => {
-          await Tone.start();
-          setIsAudioReady(true);
-        }}
-      >
-        Start audio
-      </button>
-    </>
+    <canvas ref={canvasRef} {...rest} style={{border: "1px solid black"}}>
+      <p>Alt text here</p>
+    </canvas>
   );
 };
 
