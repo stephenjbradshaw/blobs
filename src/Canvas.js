@@ -14,23 +14,38 @@ const Canvas = ({renderFrame, ...rest}) => {
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    const tick = (currentTimestamp) => {
-      // If this is the first frame, store the initial timestamp
-      if (timers.initialTimestamp === undefined) {
+    const updateTimers = (currentTimestamp) => {
+      /* currentTimestamp is undefined on first tick, and for the
+       * first tick after every re-render of the component.
+       * Skip setting the timers for these ticks
+       */
+      if (currentTimestamp === undefined) return;
+
+      // On the second tick, set the initial timestamp
+      if (timers.initialTimestamp === undefined)
         timers.initialTimestamp = currentTimestamp;
-      }
-      // Calculate time since animation started – animation progress will be based on this
+
+      /* On the second and subsequent ticks, calculate time since animation started.
+       * animation progress will be based on this
+       */
       timers.elapsedTime = currentTimestamp - timers.initialTimestamp;
+    };
+
+    // Main animation loop
+    const tick = (currentTimestamp) => {
+      updateTimers(currentTimestamp);
 
       if (timers.previousTimestamp !== currentTimestamp) {
         renderFrame(canvas, timers.elapsedTime);
       }
 
       timers.previousTimestamp = currentTimestamp;
-      // Step to next frame with recursive call
+
+      // Step to next tick (recursively)
       requestIdRef.current = window.requestAnimationFrame(tick);
     };
 
+    // Start animation
     tick();
 
     return () => {

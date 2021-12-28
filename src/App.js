@@ -5,6 +5,9 @@ import IconButton from "@mui/material/IconButton";
 import VolumeOff from "@mui/icons-material/VolumeOff";
 import VolumeUp from "@mui/icons-material/VolumeUp";
 import useBall from "./useBall";
+import Slider from "@mui/material/Slider";
+
+const synth = new Tone.PolySynth().toDestination();
 
 const App = () => {
   const [isAudioReady, setIsAudioReady] = useState(false);
@@ -13,7 +16,6 @@ const App = () => {
 
   const {draw} = useBall({radius: 12, color: "blue"});
 
-  const synth = new Tone.PolySynth().toDestination();
   isMuted ? (Tone.Destination.mute = true) : (Tone.Destination.mute = false);
 
   const handleMuteButtonClick = async () => {
@@ -22,6 +24,10 @@ const App = () => {
       setIsAudioReady(true);
     }
     setIsMuted((prevState) => !prevState);
+  };
+
+  const handleVelocityChange = (event, newValue) => {
+    setVelocity(newValue);
   };
 
   const renderFrame = (canvas, elapsedTime) => {
@@ -33,9 +39,20 @@ const App = () => {
   return (
     <>
       <Canvas renderFrame={renderFrame} />
-      <IconButton onClick={handleMuteButtonClick}>
+      <IconButton
+        onClick={handleMuteButtonClick}
+        aria-label={isMuted ? "Unmute" : "Mute"}
+      >
         {isMuted ? <VolumeOff /> : <VolumeUp />}
       </IconButton>
+      <Slider
+        aria-label="Velocity"
+        value={velocity}
+        onChange={handleVelocityChange}
+        min={100}
+        max={1000}
+        defaultValue={200}
+      />
     </>
   );
 };

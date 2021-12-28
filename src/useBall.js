@@ -15,7 +15,7 @@ const useBall = ({radius, color}) => {
   const ball = ballRef.current;
 
   const draw = (canvas, ctx, elapsedTime, velocity, synth, isAudioReady) => {
-    // Do nothing on first frame, because we need two frames to work out time since last draw
+    // Do nothing on first draw, because we need two frames to work out time since last draw
     if (elapsedTime === 0) return;
 
     /* Base animation speed on time rather than frames.
@@ -28,12 +28,39 @@ const useBall = ({radius, color}) => {
     if (ball.isFirstDraw) {
       ball.x = getRandomInt(0, canvas.width);
       ball.y = getRandomInt(0, canvas.height);
-      ball.dx = (ball.timeSinceLastDraw / 1000) * velocity;
-      ball.dy = (ball.timeSinceLastDraw / 1000) * velocity;
       ball.isFirstDraw = false;
     }
 
-    // Move the drawing position
+    // Set speed and direction
+    ball.dx = (ball.timeSinceLastDraw / 1000) * velocity;
+    if (ball.isDxFlipped) ball.dx = -ball.dx;
+    ball.dy = (ball.timeSinceLastDraw / 1000) * velocity;
+    if (ball.isDyFlipped) ball.dy = -ball.dy;
+
+    /* Check if velocity values would cause ball to exit canvas
+     * If so, constrain them so that it stays within canvas,
+     * flip the direction for the next draw, and play a sound!
+     */
+    if (ball.x + ball.dx > canvas.width) {
+      ball.dx = canvas.width - ball.x;
+      ball.isDxFlipped = true;
+      isAudioReady && synth.triggerAttackRelease("C4", "8n");
+    } else if (ball.x + ball.dx < 0) {
+      ball.dx = 0 - ball.x;
+      ball.isDxFlipped = false;
+      isAudioReady && synth.triggerAttackRelease("D4", "8n");
+    }
+    if (ball.y + ball.dy >= canvas.height) {
+      ball.dy = canvas.height - ball.y;
+      ball.isDyFlipped = true;
+      isAudioReady && synth.triggerAttackRelease("E4", "8n");
+    } else if (ball.y + ball.dy < 0) {
+      ball.dy = 0 - ball.y;
+      ball.isDyFlipped = false;
+      isAudioReady && synth.triggerAttackRelease("F4", "8n");
+    }
+
+    // Move the drawing position to new start points
     ball.x += ball.dx;
     ball.y += ball.dy;
 
@@ -44,16 +71,7 @@ const useBall = ({radius, color}) => {
     ctx.fillStyle = ball.color;
     ctx.fill();
 
-    // On collision with edges, flip delta values for the next draw
-    if (ball.y + ball.dy > canvas.height || ball.y + ball.dy < 0) {
-      ball.dy = -ball.dy;
-      isAudioReady && synth.triggerAttackRelease("C4", "8n");
-    }
-    if (ball.x + ball.dx > canvas.width || ball.x + ball.dx < 0) {
-      ball.dx = -ball.dx;
-      isAudioReady && synth.triggerAttackRelease("D4", "8n");
-    }
-
+    // Set previous elapsed time for `timeSinceLastDraw` calculation
     ball.previousElapsedTime = elapsedTime;
   };
 
