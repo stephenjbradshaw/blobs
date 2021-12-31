@@ -26,7 +26,9 @@ const Canvas = ({renderFrame, ...rest}) => {
         timers.initialTimestamp = currentTimestamp;
 
       /* On the second and subsequent ticks, calculate time since animation started.
-       * animation progress will be based on this
+       * animation progress will be based on this, ensuring that animation speed
+       * stays independent of screen refresh rate, see:
+       * https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
        */
       timers.elapsedTime = currentTimestamp - timers.initialTimestamp;
     };
