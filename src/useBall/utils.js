@@ -47,17 +47,20 @@ export const paintBall = (ctx, ball) => {
  * Also, trigger sounds!
  */
 export const detectCollisions = (ball, canvas, isAudioReady, synth) => {
-  if (ball.x + ball.dx > canvas.width) {
+  /* Allowing the ball to move slightly outside canvas with boxSizeOffset
+   * looks more natural
+   */
+  if (ball.x + ball.dx > canvas.width - ball.radius + ball.boxSizeOffset) {
     ball.isMaxX = true;
     isAudioReady && synth.triggerAttackRelease("C4", "8n");
-  } else if (ball.x + ball.dx < 0) {
+  } else if (ball.x + ball.dx < 0 + ball.radius - ball.boxSizeOffset) {
     ball.isMinX = true;
     isAudioReady && synth.triggerAttackRelease("D4", "8n");
   }
-  if (ball.y + ball.dy >= canvas.height) {
+  if (ball.y + ball.dy > canvas.height - ball.radius + ball.boxSizeOffset) {
     ball.isMaxY = true;
     isAudioReady && synth.triggerAttackRelease("E4", "8n");
-  } else if (ball.y + ball.dy < 0) {
+  } else if (ball.y + ball.dy < 0 + ball.radius - ball.boxSizeOffset) {
     ball.isMinY = true;
     isAudioReady && synth.triggerAttackRelease("F4", "8n");
   }
@@ -72,13 +75,13 @@ export const moveDrawingPosition = (ball, canvas) => {
   ball.x += ball.dx;
   ball.y += ball.dy;
   if (ball.isMaxX) {
-    ball.x = canvas.width;
+    ball.x = canvas.width - ball.radius + ball.boxSizeOffset;
   } else if (ball.isMinX) {
-    ball.x = 0;
+    ball.x = 0 + ball.radius - ball.boxSizeOffset;
   }
   if (ball.isMaxY) {
-    ball.y = canvas.height;
+    ball.y = canvas.height - ball.radius + ball.boxSizeOffset;
   } else if (ball.isMinY) {
-    ball.y = 0;
+    ball.y = 0 + ball.radius - ball.boxSizeOffset;
   }
 };

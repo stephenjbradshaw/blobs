@@ -29,6 +29,7 @@ const useBall = ({radius, color}) => {
     timeSinceLastStep: 0,
     distanceToTravel: null,
     previousDistanceToTravel: null,
+    boxSizeOffset: 2,
   });
   const ball = ballRef.current;
 
