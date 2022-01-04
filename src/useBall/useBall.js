@@ -27,7 +27,6 @@ const useBall = ({radius, color}) => {
     isFirstStep: true,
     previousElapsedTime: 0,
     timeSinceLastStep: 0,
-    distanceToTravel: null,
     previousDistanceToTravel: null,
     boxSizeOffset: 2,
   });
@@ -44,13 +43,13 @@ const useBall = ({radius, color}) => {
     if (ball.timeSinceLastStep === 0) return;
 
     // Calculate how far the ball should move on this step
-    ball.distanceToTravel = (ball.timeSinceLastStep / 1000) * speed;
+    const distanceToTravel = (ball.timeSinceLastStep / 1000) * speed;
 
     if (ball.isFirstStep) {
-      initialise(ball, canvas);
+      initialise(ball, canvas, distanceToTravel);
       ball.isFirstStep = false;
     } else {
-      setVector(ball);
+      setVector(ball, distanceToTravel);
     }
 
     detectCollisions(ball, canvas, isAudioReady, synth);
@@ -60,7 +59,7 @@ const useBall = ({radius, color}) => {
     paintBall(ctx, ball);
 
     ball.previousElapsedTime = elapsedTime;
-    ball.previousDistanceToTravel = ball.distanceToTravel;
+    ball.previousDistanceToTravel = distanceToTravel;
   };
 
   return {step};

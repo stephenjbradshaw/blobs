@@ -1,10 +1,10 @@
 import {getRandomInt, getRandomVector} from "../utils";
 
 // Set random position and direction for first step
-export const initialise = (ball, canvas) => {
+export const initialise = (ball, canvas, distanceToTravel) => {
   ball.x = getRandomInt(0, canvas.width);
   ball.y = getRandomInt(0, canvas.height);
-  const {dx, dy} = getRandomVector(ball.distanceToTravel);
+  const {dx, dy} = getRandomVector(distanceToTravel);
   ball.dx = dx;
   ball.dy = dy;
 };
@@ -14,8 +14,8 @@ export const initialise = (ball, canvas) => {
  * Flip the sign to change direction if a collision was
  * detected on the previous step.
  */
-export const setVector = (ball) => {
-  const scaleFactor = ball.distanceToTravel / ball.previousDistanceToTravel;
+export const setVector = (ball, distanceToTravel) => {
+  const scaleFactor = distanceToTravel / ball.previousDistanceToTravel;
   ball.dx = ball.dx * scaleFactor;
   if (ball.isMaxX) {
     ball.dx = -ball.dx;
