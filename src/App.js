@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import VolumeOff from "@mui/icons-material/VolumeOff";
 import VolumeUp from "@mui/icons-material/VolumeUp";
 import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import useCirclesAnimation from "./useCirclesAnimation/useCirclesAnimation";
 import Slider from "@mui/material/Slider";
 
@@ -14,12 +15,10 @@ const App = () => {
   const [isAudioReady, setIsAudioReady] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [speed, setSpeed] = useState(200);
-  const [numberOfCircles, setNumberOfCircles] = useState(1);
 
-  const {step} = useCirclesAnimation({
+  const {addCircle, removeCircle, step} = useCirclesAnimation({
     color: "blue",
     radius: 12,
-    numberOfCircles,
   });
 
   isMuted ? (Tone.Destination.mute = true) : (Tone.Destination.mute = false);
@@ -30,10 +29,6 @@ const App = () => {
       setIsAudioReady(true);
     }
     setIsMuted((prevState) => !prevState);
-  };
-
-  const handleAddCircleButtonClick = () => {
-    setNumberOfCircles((prevState) => prevState + 1);
   };
 
   const handleSpeedChange = (event, newValue) => {
@@ -55,11 +50,11 @@ const App = () => {
       >
         {isMuted ? <VolumeOff /> : <VolumeUp />}
       </IconButton>
-      <IconButton
-        onClick={handleAddCircleButtonClick}
-        aria-label={"Add circle"}
-      >
+      <IconButton onClick={addCircle} aria-label={"Add circle"}>
         <AddIcon />
+      </IconButton>
+      <IconButton onClick={removeCircle} aria-label={"Remove circle"}>
+        <RemoveIcon />
       </IconButton>
       <Slider
         aria-label="Speed"

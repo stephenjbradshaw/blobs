@@ -7,11 +7,7 @@ import {
   setVector,
 } from "./utils";
 
-/*
-
- */
-
-const useCirclesAnimation = ({radius, color, numberOfCircles}) => {
+const useCirclesAnimation = ({radius, color}) => {
   /* Using refs means the values describing the animation persist
    * for the full lifetime of component. This allows the animation
    * to be controlled with 'normal' stateful react code without everything
@@ -21,25 +17,38 @@ const useCirclesAnimation = ({radius, color, numberOfCircles}) => {
     previousElapsedTime: 0,
     timeSinceLastStep: 0,
     boxSizeOffset: 2,
-    isFirstStep: true,
   });
   const animation = animationRef.current;
+
+  const initialCircle = {
+    isFirstStep: true,
+    x: null,
+    y: null,
+    dx: null,
+    dy: null,
+    isMaxX: false,
+    isMinX: false,
+    isMaxY: false,
+    isMinY: false,
+    radius,
+    color,
+    previousDistanceToTravel: null,
+  };
+
   const circlesRef = useRef([
     {
-      x: null,
-      y: null,
-      dx: null,
-      dy: null,
-      isMaxX: false,
-      isMinX: false,
-      isMaxY: false,
-      isMinY: false,
-      radius,
-      color,
-      previousDistanceToTravel: null,
+      ...initialCircle,
     },
   ]);
   const circles = circlesRef.current;
+
+  const addCircle = () => {
+    circles.push({...initialCircle});
+  };
+
+  const removeCircle = () => {
+    circles.pop();
+  };
 
   const step = (canvas, ctx, elapsedTime, speed, synth, isAudioReady) => {
     // Skip the first step, because >1 step is needed to calculate timeSinceLastStep
@@ -55,9 +64,9 @@ const useCirclesAnimation = ({radius, color, numberOfCircles}) => {
       // Calculate how far the circle should move on this step
       const distanceToTravel = (animation.timeSinceLastStep / 1000) * speed;
 
-      if (animation.isFirstStep) {
+      if (circle.isFirstStep) {
         initialise(circle, canvas, distanceToTravel);
-        animation.isFirstStep = false;
+        circle.isFirstStep = false;
       } else {
         setVector(circle, distanceToTravel);
       }
@@ -74,7 +83,7 @@ const useCirclesAnimation = ({radius, color, numberOfCircles}) => {
     animation.previousElapsedTime = elapsedTime;
   };
 
-  return {step};
+  return {addCircle, removeCircle, step};
 };
 
 export default useCirclesAnimation;
